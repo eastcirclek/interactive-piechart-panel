@@ -85,6 +85,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
               show: true, // disable/enable legend
               values: true
             },
+            tooltip: {
+              show: true
+            },
             links: [],
             datasource: null,
             maxDataPoints: 3,
