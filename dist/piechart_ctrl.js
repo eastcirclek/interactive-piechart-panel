@@ -1,6 +1,8 @@
 'use strict';
 
 System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/time_series', './rendering', './legend'], function (_export, _context) {
+  "use strict";
+
   var MetricsPanelCtrl, _, kbn, TimeSeries, rendering, legend, _createClass, PieChartCtrl;
 
   function _classCallCheck(instance, Constructor) {
@@ -69,12 +71,14 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
       _export('PieChartCtrl', PieChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(PieChartCtrl, _MetricsPanelCtrl);
 
-        function PieChartCtrl($scope, $injector, $rootScope) {
+        function PieChartCtrl($scope, $injector, $rootScope, variableSrv) {
           _classCallCheck(this, PieChartCtrl);
 
-          var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PieChartCtrl).call(this, $scope, $injector));
+          var _this = _possibleConstructorReturn(this, (PieChartCtrl.__proto__ || Object.getPrototypeOf(PieChartCtrl)).call(this, $scope, $injector));
 
           _this.$rootScope = $rootScope;
+          _this.variableSrv = variableSrv;
+          _this.variableNames = Object.keys(variableSrv.templateSrv._index);
           _this.hiddenSeries = {};
 
           var panelDefaults = {
@@ -99,6 +103,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
             combine: {
               threshold: 0.0,
               label: 'Others'
+            },
+            variable: {
+              update: false
             }
           };
 
