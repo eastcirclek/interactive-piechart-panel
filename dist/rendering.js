@@ -118,7 +118,7 @@ System.register(['lodash', 'jquery', 'jquery.flot', 'jquery.flot.pie'], function
         },
         grid: {
           hoverable: true,
-          clickable: false
+          clickable: true
         }
       };
 
@@ -141,22 +141,39 @@ System.register(['lodash', 'jquery', 'jquery.flot', 'jquery.flot.pie'], function
       elem.html(plotCanvas);
 
       $.plot(plotCanvas, ctrl.data, options);
-      plotCanvas.bind("plothover", function (event, pos, item) {
-        if (!item) {
-          $tooltip.detach();
-          return;
+      plotCanvas.bind("plothover plotclick", function (event, pos, item) {
+        if (event.type == "plothover") {
+          if (!item) {
+            $tooltip.detach();
+            return;
+          }
+
+          var body;
+          var percent = parseFloat(item.series.percent).toFixed(2);
+          var formatted = ctrl.formatValue(item.series.data[0][1]);
+
+          body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
+          body += '<div class="graph-tooltip-value">' + item.series.label + ': ' + formatted;
+          body += " (" + percent + "%)" + '</div>';
+          body += "</div></div>";
+
+          $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
+        } else if (event.type == "plotclick") {
+          var label = item.series.label;
+
+          if (ctrl.panel.variable.update && ctrl.panel.variable.name) {
+            var variable = _.find(ctrl.variableSrv.variables, { "name": ctrl.panel.variable.name });
+            variable.current.text = label;
+            variable.current.value = label;
+
+            ctrl.variableSrv.updateOptions(variable).then(function () {
+              ctrl.variableSrv.variableUpdated(variable).then(function () {
+                scope.$emit('template-variable-value-updated');
+                scope.$root.$broadcast('refresh');
+              });
+            });
+          }
         }
-
-        var body;
-        var percent = parseFloat(item.series.percent).toFixed(2);
-        var formatted = ctrl.formatValue(item.series.data[0][1]);
-
-        body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
-        body += '<div class="graph-tooltip-value">' + item.series.label + ': ' + formatted;
-        body += " (" + percent + "%)" + '</div>';
-        body += "</div></div>";
-
-        $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
       });
     }
 
