@@ -71,12 +71,14 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
       _export('PieChartCtrl', PieChartCtrl = function (_MetricsPanelCtrl) {
         _inherits(PieChartCtrl, _MetricsPanelCtrl);
 
-        function PieChartCtrl($scope, $injector, $rootScope) {
+        function PieChartCtrl($scope, $injector, $rootScope, variableSrv) {
           _classCallCheck(this, PieChartCtrl);
 
           var _this = _possibleConstructorReturn(this, (PieChartCtrl.__proto__ || Object.getPrototypeOf(PieChartCtrl)).call(this, $scope, $injector));
 
           _this.$rootScope = $rootScope;
+          _this.variableSrv = variableSrv;
+          _this.variableNames = Object.keys(variableSrv.templateSrv._index);
           _this.hiddenSeries = {};
 
           var panelDefaults = {
@@ -104,6 +106,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
             combine: {
               threshold: 0.0,
               label: 'Others'
+            },
+            variable: {
+              update: false
             }
           };
 
