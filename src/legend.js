@@ -36,6 +36,7 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
         var seriesInfo = seriesList[index];
         var scrollPosition = $($container.children('tbody')).scrollTop();
         ctrl.toggleSeries(seriesInfo);
+        ctrl.updateVariableIfNecessary();
         $($container.children('tbody')).scrollTop(scrollPosition);
       }
 
@@ -192,7 +193,7 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
           }
 
           var html = '<div class="graph-legend-series';
-          if (ctrl.hiddenSeries[series.alias]) { html += ' graph-legend-series-hidden'; }
+          if (ctrl.selectedSeries[series.alias]) { html += ' graph-legend-series-hidden'; }
           html += '" data-series-index="' + i + '">';
           html += '<span class="graph-legend-icon" style="float:none;">';
           html += '<i class="fa fa-minus pointer" style="color:' + series.color + '"></i>';

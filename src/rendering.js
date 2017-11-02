@@ -106,9 +106,9 @@ export default function link(scope, elem, attrs, ctrl) {
             opacity: 0.0
           },
           combine: {
-          threshold: ctrl.panel.combine.threshold,
-          label: ctrl.panel.combine.label
-        }
+            threshold: ctrl.panel.combine.threshold,
+            label: ctrl.panel.combine.label
+          }
         }
       },
       grid: {
@@ -123,53 +123,46 @@ export default function link(scope, elem, attrs, ctrl) {
 
     data = ctrl.data;
 
-    for (let i = 0; i < data.length; i++) {
-      let series = data[i];
+    if (ctrl.panel.clickAction === 'Hide slice') {
+      for (let i = 0; i < data.length; i++) {
+        let series = data[i];
 
-      // if hidden remove points and disable stack
-      if (ctrl.hiddenSeries[series.label]) {
-        series.data = {};
-        series.stack = false;
+        // if hidden remove points and disable stack
+        if (ctrl.selectedSeries[series.label]) {
+          series.data = {};
+          series.stack = false;
+        }
       }
     }
 
     elem.html(plotCanvas);
 
     $.plot(plotCanvas, ctrl.data, options);
-    plotCanvas.bind("plothover plotclick", function (event, pos, item) {
-      if (event.type == "plothover") {
-        if (!item) {
-          $tooltip.detach();
-          return;
-        }
-
-        var body;
-        var percent = parseFloat(item.series.percent).toFixed(2);
-        var formatted = ctrl.formatValue(item.series.data[0][1]);
-
-        body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
-        body += '<div class="graph-tooltip-value">' + item.series.label + ': ' + formatted;
-        body += " (" + percent + "%)" + '</div>';
-        body += "</div></div>";
-
-        $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
-      } else if (event.type == "plotclick") {
-        const label = item.series.label;
-
-        if (ctrl.panel.variable.update && ctrl.panel.variable.name) {
-          const variable = _.find(ctrl.variableSrv.variables, {"name": ctrl.panel.variable.name});
-          variable.current.text = label;
-          variable.current.value = label;
-
-          ctrl.variableSrv.updateOptions(variable).then(() => {
-            ctrl.variableSrv.variableUpdated(variable).then(() => {
-              scope.$emit('template-variable-value-updated');
-              scope.$root.$broadcast('refresh');
-            });
-          });
-        }
+    plotCanvas.on("plothover", function (event, pos, item) {
+      if (!item) {
+        $tooltip.detach();
+        return;
       }
+
+      var body;
+      var percent = parseFloat(item.series.percent).toFixed(2);
+      var formatted = ctrl.formatValue(item.series.data[0][1]);
+
+      body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
+      body += '<div class="graph-tooltip-value">' + item.series.label + ': ' + formatted;
+      body += " (" + percent + "%)" + '</div>';
+      body += "</div></div>";
+
+      $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
     });
+
+    if (ctrl.panel.clickAction) {
+      plotCanvas.on('plotclick', function (event, pos, item) {
+        var series = _.find(ctrl.series, {"label": item.series.label});
+        ctrl.toggleSeries(series);
+        ctrl.updateVariableIfNecessary();
+      });
+    }
   }
 
   function render(incrementRenderCounter) {

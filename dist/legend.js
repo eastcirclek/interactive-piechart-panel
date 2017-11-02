@@ -45,6 +45,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
               var seriesInfo = seriesList[index];
               var scrollPosition = $($container.children('tbody')).scrollTop();
               ctrl.toggleSeries(seriesInfo);
+              ctrl.updateVariableIfNecessary();
               $($container.children('tbody')).scrollTop(scrollPosition);
             }
 
@@ -199,7 +200,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 }
 
                 var html = '<div class="graph-legend-series';
-                if (ctrl.hiddenSeries[series.alias]) {
+                if (ctrl.selectedSeries[series.alias]) {
                   html += ' graph-legend-series-hidden';
                 }
                 html += '" data-series-index="' + i + '">';
