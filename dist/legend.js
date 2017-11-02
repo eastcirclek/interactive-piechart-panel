@@ -52,6 +52,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 ctrl.toggleCombinedSeries(combined);
               }
               ctrl.render();
+              ctrl.updateVariableIfNecessary();
               $($container.children('tbody')).scrollTop(scrollPosition);
             }
 
@@ -213,7 +214,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 }
 
                 var html = '<div class="graph-legend-series';
-                if (ctrl.hiddenSeries[series.alias]) {
+                if (ctrl.selectedSeries[series.alias]) {
                   html += ' graph-legend-series-hidden';
                 }
                 html += '" data-series-index="' + i + '">';
@@ -242,11 +243,11 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
               if (combined.length > 0) {
                 // The color of the combined slice is that of a slice that meets either of below conditions first:
                 // - the first slice to be combined, or
-                // - the first slice whose label is in ctrl.hiddenSeries
+                // - the first slice whose label is in ctrl.selectedSeries
                 // Must scan through 'data', not 'seriesList', because 'data' is the one used to draw pie chart
                 var labelsInOthers = _.map(combined, "label");
                 var combinedSliceColor = _.find(data, function (series) {
-                  return _.includes(labelsInOthers, series.label) || series.label in ctrl.hiddenSeries;
+                  return _.includes(labelsInOthers, series.label) || series.label in ctrl.selectedSeries;
                 }).color;
 
                 var color = combinedSliceColor;
@@ -256,7 +257,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 var label = ctrl.panel.combine.label;
 
                 var html = '<div class="graph-legend-series';
-                if (ctrl.hiddenSeries[label]) {
+                if (ctrl.selectedSeries[label]) {
                   html += ' graph-legend-series-hidden';
                 }
                 html += '" data-series-index="-1">'; // -1 : the combined pie

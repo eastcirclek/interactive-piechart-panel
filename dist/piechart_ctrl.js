@@ -79,7 +79,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
           _this.$rootScope = $rootScope;
           _this.variableSrv = variableSrv;
           _this.variableNames = Object.keys(variableSrv.templateSrv._index);
-          _this.hiddenSeries = {};
+          _this.selectedSeries = {};
 
           var panelDefaults = {
             pieType: 'pie',
@@ -244,10 +244,10 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
         }, {
           key: 'toggleSeries',
           value: function toggleSeries(serie) {
-            if (this.hiddenSeries[serie.label]) {
-              delete this.hiddenSeries[serie.alias];
+            if (this.selectedSeries[serie.label]) {
+              delete this.selectedSeries[serie.alias];
             } else {
-              this.hiddenSeries[serie.label] = true;
+              this.selectedSeries[serie.label] = true;
             }
           }
         }, {
@@ -261,6 +261,27 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
               delete this.hiddenSeries[this.panel.combine.label];
             } else {
               this.hiddenSeries[this.panel.combine.label] = true;
+            }
+          }
+        }, {
+          key: 'updateVariableIfNecessary',
+          value: function updateVariableIfNecessary() {
+            var _this3 = this;
+
+            if (this.panel.clickAction === 'Update variable') {
+              if (this.panel.variableToUpdate) {
+                var selectedSeries = Object.keys(this.selectedSeries);
+
+                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variable.name });
+                variable.current.text = selectedSeries.join(' + ');
+                variable.current.value = selectedSeries;
+
+                this.variableSrv.updateOptions(variable).then(function () {
+                  _this3.variableSrv.variableUpdated(variable).then(function () {
+                    _this3.$scope.$emit('template-variable-value-updated');
+                  });
+                });
+              }
             }
           }
         }]);

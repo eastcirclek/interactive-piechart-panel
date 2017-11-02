@@ -12,7 +12,7 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     this.$rootScope = $rootScope;
     this.variableSrv = variableSrv;
     this.variableNames = Object.keys(variableSrv.templateSrv._index);
-    this.hiddenSeries = {};
+    this.selectedSeries = {};
 
     var panelDefaults = {
       pieType: 'pie',
@@ -159,10 +159,10 @@ export class PieChartCtrl extends MetricsPanelCtrl {
   }
 
   toggleSeries(serie) {
-    if (this.hiddenSeries[serie.label]) {
-      delete this.hiddenSeries[serie.alias];
+    if (this.selectedSeries[serie.label]) {
+      delete this.selectedSeries[serie.alias];
     } else {
-      this.hiddenSeries[serie.label] = true;
+      this.selectedSeries[serie.label] = true;
     }
   }
 
@@ -175,6 +175,24 @@ export class PieChartCtrl extends MetricsPanelCtrl {
       delete this.hiddenSeries[this.panel.combine.label];
     } else {
       this.hiddenSeries[this.panel.combine.label] = true;
+    }
+  }
+
+  updateVariableIfNecessary() {
+    if (this.panel.clickAction === 'Update variable') {
+      if (this.panel.variableToUpdate) {
+        var selectedSeries = Object.keys(this.selectedSeries);
+
+        const variable = _.find(this.variableSrv.variables, {"name": this.panel.variable.name});
+        variable.current.text = selectedSeries.join(' + ');
+        variable.current.value = selectedSeries;
+
+        this.variableSrv.updateOptions(variable).then(() => {
+          this.variableSrv.variableUpdated(variable).then(() => {
+            this.$scope.$emit('template-variable-value-updated');
+          });
+        });
+      }
     }
   }
 }
