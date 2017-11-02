@@ -257,10 +257,10 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
               this.toggleSeries(combined[i]);
             }
 
-            if (this.hiddenSeries[this.panel.combine.label]) {
-              delete this.hiddenSeries[this.panel.combine.label];
+            if (this.selectedSeries[this.panel.combine.label]) {
+              delete this.selectedSeries[this.panel.combine.label];
             } else {
-              this.hiddenSeries[this.panel.combine.label] = true;
+              this.selectedSeries[this.panel.combine.label] = true;
             }
           }
         }, {

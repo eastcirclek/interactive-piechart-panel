@@ -171,10 +171,10 @@ export class PieChartCtrl extends MetricsPanelCtrl {
       this.toggleSeries(combined[i]);
     }
 
-    if (this.hiddenSeries[this.panel.combine.label]) {
-      delete this.hiddenSeries[this.panel.combine.label];
+    if (this.selectedSeries[this.panel.combine.label]) {
+      delete this.selectedSeries[this.panel.combine.label];
     } else {
-      this.hiddenSeries[this.panel.combine.label] = true;
+      this.selectedSeries[this.panel.combine.label] = true;
     }
   }
 

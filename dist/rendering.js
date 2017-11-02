@@ -167,14 +167,14 @@ System.register(['lodash', 'jquery', 'jquery.flot', 'jquery.flot.pie'], function
 
           $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
         });
+      }
 
-        if (ctrl.panel.clickAction) {
-          plotCanvas.on('plotclick', function (event, pos, item) {
-            var series = _.find(ctrl.series, { "label": item.series.label });
-            ctrl.toggleSeries(series);
-            ctrl.updateVariableIfNecessary();
-          });
-        }
+      if (ctrl.panel.clickAction) {
+        plotCanvas.on('plotclick', function (event, pos, item) {
+          var series = _.find(ctrl.series, { "label": item.series.label });
+          ctrl.toggleSeries(series);
+          ctrl.updateVariableIfNecessary();
+        });
       }
     }
 

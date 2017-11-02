@@ -160,8 +160,9 @@ export default function link(scope, elem, attrs, ctrl) {
         body += "</div>";
         body += "</div></div>";
 
-      $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
-    });
+        $tooltip.html(body).place_tt(pos.pageX + 20, pos.pageY);
+      });
+    }
 
     if (ctrl.panel.clickAction) {
       plotCanvas.on('plotclick', function (event, pos, item) {
@@ -190,4 +191,3 @@ export default function link(scope, elem, attrs, ctrl) {
     }
   }
 }
-

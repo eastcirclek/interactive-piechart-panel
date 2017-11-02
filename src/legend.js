@@ -234,11 +234,11 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
         if (combined.length > 0) {
           // The color of the combined slice is that of a slice that meets either of below conditions first:
           // - the first slice to be combined, or
-          // - the first slice whose label is in ctrl.hiddenSeries
+          // - the first slice whose label is in ctrl.selectedSeries
           // Must scan through 'data', not 'seriesList', because 'data' is the one used to draw pie chart
           var labelsInOthers = _.map(combined, "label");
           var combinedSliceColor = _.find(data, function(series) {
-            return _.includes(labelsInOthers, series.label) || (series.label in ctrl.hiddenSeries);
+            return _.includes(labelsInOthers, series.label) || (series.label in ctrl.selectedSeries);
           }).color;
 
           var color = combinedSliceColor;
@@ -246,7 +246,7 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
           var label = ctrl.panel.combine.label;
 
           var html = '<div class="graph-legend-series';
-          if (ctrl.hiddenSeries[label]) { html += ' graph-legend-series-hidden'; }
+          if (ctrl.selectedSeries[label]) { html += ' graph-legend-series-hidden'; }
           html += '" data-series-index="-1">'; // -1 : the combined pie
           html += '<span class="graph-legend-icon" style="float:none;">';
           html += '<i class="fa fa-minus pointer" style="color:' + color + '"></i>';
