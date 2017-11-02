@@ -43,8 +43,8 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
           ctrl.toggleCombinedSeries(combined);
         }
         ctrl.render();
-        ctrl.updateVariableIfNecessary();
         $($container.children('tbody')).scrollTop(scrollPosition);
+        ctrl.updateVariableIfNecessary();
       }
 
       function sortLegend(e) {

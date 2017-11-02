@@ -52,8 +52,8 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 ctrl.toggleCombinedSeries(combined);
               }
               ctrl.render();
-              ctrl.updateVariableIfNecessary();
               $($container.children('tbody')).scrollTop(scrollPosition);
+              ctrl.updateVariableIfNecessary();
             }
 
             function sortLegend(e) {
