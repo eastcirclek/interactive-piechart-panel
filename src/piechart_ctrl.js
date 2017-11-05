@@ -195,6 +195,25 @@ export class PieChartCtrl extends MetricsPanelCtrl {
       }
     }
   }
+
+  updateVariableIfNecessary() {
+    if (this.panel.clickAction === 'Update variable') {
+      if (this.panel.variableToUpdate) {
+        var selectedSeries = Object.keys(this.selectedSeries);
+
+        const variable = _.find(this.variableSrv.variables, {"name": this.panel.variable.name});
+        variable.current.text = selectedSeries.join(' + ');
+        variable.current.value = selectedSeries;
+
+        this.variableSrv.updateOptions(variable).then(() => {
+          this.variableSrv.variableUpdated(variable).then(() => {
+            this.$scope.$emit('template-variable-value-updated');
+            this.$scope.$root.$broadcast('refresh');
+          });
+        });
+      }
+    }
+  }
 }
 
 PieChartCtrl.templateUrl = 'module.html';

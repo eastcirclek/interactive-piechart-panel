@@ -161,6 +161,7 @@ export default function link(scope, elem, attrs, ctrl) {
         var percent = parseFloat(item.series.percent).toFixed(2);
         var formatted = ctrl.formatValue(item.series.data[0][1]);
 
+
         body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
         body += '<div class="graph-tooltip-value">' + item.series.label;
         if (ctrl.panel.tooltip.showValue === true) {

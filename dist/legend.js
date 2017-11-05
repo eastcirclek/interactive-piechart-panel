@@ -44,6 +44,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
               var el = $(e.currentTarget);
               var index = getSeriesIndexForElement(el);
               var scrollPosition = $($container.children('tbody')).scrollTop();
+
               if (index != -1) {
                 var seriesInfo = seriesList[index];
                 ctrl.toggleSeries(seriesInfo);
@@ -51,6 +52,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 // when the combined slice is toggled
                 ctrl.toggleCombinedSeries(combined);
               }
+
               ctrl.render();
               $($container.children('tbody')).scrollTop(scrollPosition);
               ctrl.updateVariableIfNecessary();

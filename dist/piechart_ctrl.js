@@ -284,6 +284,28 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
               }
             }
           }
+        }, {
+          key: 'updateVariableIfNecessary',
+          value: function updateVariableIfNecessary() {
+            var _this4 = this;
+
+            if (this.panel.clickAction === 'Update variable') {
+              if (this.panel.variableToUpdate) {
+                var selectedSeries = Object.keys(this.selectedSeries);
+
+                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variable.name });
+                variable.current.text = selectedSeries.join(' + ');
+                variable.current.value = selectedSeries;
+
+                this.variableSrv.updateOptions(variable).then(function () {
+                  _this4.variableSrv.variableUpdated(variable).then(function () {
+                    _this4.$scope.$emit('template-variable-value-updated');
+                    _this4.$scope.$root.$broadcast('refresh');
+                  });
+                });
+              }
+            }
+          }
         }]);
 
         return PieChartCtrl;
