@@ -47,6 +47,11 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
         ctrl.render();
         $($container.children('tbody')).scrollTop(scrollPosition);
         ctrl.updateVariableIfNecessary();
+        if (ctrl.panel.clickAction === 'Update variable') {
+          ctrl.updateVariable();
+        } else {
+          ctrl.render();
+        }
       }
 
       function sortLegend(e) {

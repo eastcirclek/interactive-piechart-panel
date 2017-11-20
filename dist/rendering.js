@@ -185,8 +185,11 @@ System.register(['lodash', 'jquery', 'jquery.flot', 'jquery.flot.pie'], function
         plotCanvas.on('plotclick', function (event, pos, item) {
           var series = _.find(ctrl.series, { "label": item.series.label });
           ctrl.toggleSeries(series);
-          ctrl.render();
-          ctrl.updateVariableIfNecessary();
+          if (ctrl.panel.clickAction === 'Update variable') {
+            ctrl.updateVariable();
+          } else {
+            ctrl.render();
+          }
         });
       }
     }

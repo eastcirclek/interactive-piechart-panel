@@ -11,7 +11,7 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     super($scope, $injector);
     this.$rootScope = $rootScope;
     this.variableSrv = variableSrv;
-    this.variableNames = Object.keys(variableSrv.templateSrv._index);
+    this.variableNames = _.map(variableSrv.variables, 'name');
     this.selectedSeries = {};
 
     var panelDefaults = {
@@ -39,9 +39,6 @@ export class PieChartCtrl extends MetricsPanelCtrl {
       combine: {
         threshold: 0.0,
         label: 'Others'
-      },
-      variable: {
-        update: false
       }
     };
 
@@ -78,6 +75,20 @@ export class PieChartCtrl extends MetricsPanelCtrl {
 
   onRender() {
     this.data = this.parseSeries(this.series);
+
+    this.selectedSeries = {};
+
+    const variable = _.find(this.variableSrv.variables, {'name': this.panel.variableToUpdate});
+    const selected = _.map(_.filter(variable.options, {'selected': true}), 'value');
+    if (selected.constructor === Array) {
+      if (selected[0] === '$__all') {
+        // do nothing
+      } else {
+        for (let i = 0; i < selected.length; i++) {
+          this.selectedSeries[selected[i]] = true;
+        }
+      }
+    }
   }
 
   parseSeries(series) {
@@ -178,30 +189,12 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     }
   }
 
-  updateVariableIfNecessary() {
+  updateVariable() {
     if (this.panel.clickAction === 'Update variable') {
       if (this.panel.variableToUpdate) {
-        var selectedSeries = Object.keys(this.selectedSeries);
+        var selectedSeries = _.keys(this.selectedSeries);
 
-        const variable = _.find(this.variableSrv.variables, {"name": this.panel.variable.name});
-        variable.current.text = selectedSeries.join(' + ');
-        variable.current.value = selectedSeries;
-
-        this.variableSrv.updateOptions(variable).then(() => {
-          this.variableSrv.variableUpdated(variable).then(() => {
-            this.$scope.$emit('template-variable-value-updated');
-          });
-        });
-      }
-    }
-  }
-
-  updateVariableIfNecessary() {
-    if (this.panel.clickAction === 'Update variable') {
-      if (this.panel.variableToUpdate) {
-        var selectedSeries = Object.keys(this.selectedSeries);
-
-        const variable = _.find(this.variableSrv.variables, {"name": this.panel.variable.name});
+        const variable = _.find(this.variableSrv.variables, {"name": this.panel.variableToUpdate});
         variable.current.text = selectedSeries.join(' + ');
         variable.current.value = selectedSeries;
 

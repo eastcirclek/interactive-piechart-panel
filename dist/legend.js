@@ -56,6 +56,11 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
               ctrl.render();
               $($container.children('tbody')).scrollTop(scrollPosition);
               ctrl.updateVariableIfNecessary();
+              if (ctrl.panel.clickAction === 'Update variable') {
+                ctrl.updateVariable();
+              } else {
+                ctrl.render();
+              }
             }
 
             function sortLegend(e) {

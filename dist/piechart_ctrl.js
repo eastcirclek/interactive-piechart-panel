@@ -78,7 +78,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
 
           _this.$rootScope = $rootScope;
           _this.variableSrv = variableSrv;
-          _this.variableNames = Object.keys(variableSrv.templateSrv._index);
+          _this.variableNames = _.map(variableSrv.variables, 'name');
           _this.selectedSeries = {};
 
           var panelDefaults = {
@@ -106,9 +106,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
             combine: {
               threshold: 0.0,
               label: 'Others'
-            },
-            variable: {
-              update: false
             }
           };
 
@@ -152,6 +149,20 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
           key: 'onRender',
           value: function onRender() {
             this.data = this.parseSeries(this.series);
+
+            this.selectedSeries = {};
+
+            var variable = _.find(this.variableSrv.variables, { 'name': this.panel.variableToUpdate });
+            var selected = _.map(_.filter(variable.options, { 'selected': true }), 'value');
+            if (selected.constructor === Array) {
+              if (selected[0] === '$__all') {
+                // do nothing
+              } else {
+                for (var i = 0; i < selected.length; i++) {
+                  this.selectedSeries[selected[i]] = true;
+                }
+              }
+            }
           }
         }, {
           key: 'parseSeries',
@@ -264,43 +275,22 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
             }
           }
         }, {
-          key: 'updateVariableIfNecessary',
-          value: function updateVariableIfNecessary() {
+          key: 'updateVariable',
+          value: function updateVariable() {
             var _this3 = this;
 
             if (this.panel.clickAction === 'Update variable') {
               if (this.panel.variableToUpdate) {
-                var selectedSeries = Object.keys(this.selectedSeries);
+                var selectedSeries = _.keys(this.selectedSeries);
 
-                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variable.name });
+                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variableToUpdate });
                 variable.current.text = selectedSeries.join(' + ');
                 variable.current.value = selectedSeries;
 
                 this.variableSrv.updateOptions(variable).then(function () {
                   _this3.variableSrv.variableUpdated(variable).then(function () {
                     _this3.$scope.$emit('template-variable-value-updated');
-                  });
-                });
-              }
-            }
-          }
-        }, {
-          key: 'updateVariableIfNecessary',
-          value: function updateVariableIfNecessary() {
-            var _this4 = this;
-
-            if (this.panel.clickAction === 'Update variable') {
-              if (this.panel.variableToUpdate) {
-                var selectedSeries = Object.keys(this.selectedSeries);
-
-                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variable.name });
-                variable.current.text = selectedSeries.join(' + ');
-                variable.current.value = selectedSeries;
-
-                this.variableSrv.updateOptions(variable).then(function () {
-                  _this4.variableSrv.variableUpdated(variable).then(function () {
-                    _this4.$scope.$emit('template-variable-value-updated');
-                    _this4.$scope.$root.$broadcast('refresh');
+                    _this3.$scope.$root.$broadcast('refresh');
                   });
                 });
               }
