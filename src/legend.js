@@ -21,7 +21,13 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
         data = ctrl.series;
         if (data) {
           for(var i in data) {
-            data[i].color = ctrl.data[i].color;
+            const label = ctrl.data[i].label;
+            const color = ctrl.data[i].color;
+
+            const serie = _.find(ctrl.series, {'label':label})
+            if (serie) {
+              serie.color = color;
+            }
           }
           render();
         }
@@ -44,13 +50,11 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
           ctrl.toggleCombinedSeries(combined);
         }
 
-        ctrl.render();
-        $($container.children('tbody')).scrollTop(scrollPosition);
-        ctrl.updateVariableIfNecessary();
         if (ctrl.panel.clickAction === 'Update variable') {
           ctrl.updateVariable();
         } else {
           ctrl.render();
+          $($container.children('tbody')).scrollTop(scrollPosition);
         }
       }
 
@@ -198,7 +202,6 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
             combined.push(series);
             continue;
           }
-          var seriesData = ctrl.data[i];
 
           // ignore empty series
           if (panel.legend.hideEmpty && series.allIsNull) {
@@ -215,13 +218,18 @@ angular.module('grafana.directives').directive('piechartLegend', function(popove
           }
 
           var html = '<div class="graph-legend-series';
-          if (ctrl.selectedSeries[series.alias]) { html += ' graph-legend-series-hidden'; }
+
+          if (ctrl.panel.clickAction === 'Update variable') {
+            if (!ctrl.selectedSeries[series.alias]) { html += ' graph-legend-series-hidden'; }
+          } else {
+            if (ctrl.selectedSeries[series.alias]) { html += ' graph-legend-series-hidden'; }
+          }
           html += '" data-series-index="' + i + '">';
           html += '<span class="graph-legend-icon" style="float:none;">';
-          html += '<i class="fa fa-minus pointer" style="color:' + seriesData.color + '"></i>';
+          html += '<i class="fa fa-minus pointer" style="color:' + series.color + '"></i>';
           html += '</span>';
 
-          html += '<a class="graph-legend-alias" style="float:none;">' + seriesData.label + '</a>';
+          html += '<a class="graph-legend-alias" style="float:none;">' + series.label + '</a>';
 
           if (showValues && tableLayout) {
             var value = series.stats[ctrl.panel.valueName];

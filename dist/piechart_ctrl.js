@@ -148,18 +148,21 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
         }, {
           key: 'onRender',
           value: function onRender() {
+            console.log(this.series);
             this.data = this.parseSeries(this.series);
 
-            this.selectedSeries = {};
+            if (this.panel.clickAction === 'Update variable') {
+              this.selectedSeries = {};
 
-            var variable = _.find(this.variableSrv.variables, { 'name': this.panel.variableToUpdate });
-            var selected = _.map(_.filter(variable.options, { 'selected': true }), 'value');
-            if (selected.constructor === Array) {
-              if (selected[0] === '$__all') {
-                // do nothing
-              } else {
-                for (var i = 0; i < selected.length; i++) {
-                  this.selectedSeries[selected[i]] = true;
+              var variable = _.find(this.variableSrv.variables, { 'name': this.panel.variableToUpdate });
+              var selected = _.map(_.filter(variable.options, { 'selected': true }), 'value');
+              if (selected.constructor === Array) {
+                if (selected[0] === '$__all') {
+                  // do nothing
+                } else {
+                  for (var i = 0; i < selected.length; i++) {
+                    this.selectedSeries[selected[i]] = true;
+                  }
                 }
               }
             }
@@ -279,21 +282,19 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
           value: function updateVariable() {
             var _this3 = this;
 
-            if (this.panel.clickAction === 'Update variable') {
-              if (this.panel.variableToUpdate) {
-                var selectedSeries = _.keys(this.selectedSeries);
+            if (this.panel.variableToUpdate) {
+              var selectedSeries = _.keys(this.selectedSeries);
 
-                var variable = _.find(this.variableSrv.variables, { "name": this.panel.variableToUpdate });
-                variable.current.text = selectedSeries.join(' + ');
-                variable.current.value = selectedSeries;
+              var variable = _.find(this.variableSrv.variables, { "name": this.panel.variableToUpdate });
+              variable.current.text = selectedSeries.join(' + ');
+              variable.current.value = selectedSeries;
 
-                this.variableSrv.updateOptions(variable).then(function () {
-                  _this3.variableSrv.variableUpdated(variable).then(function () {
-                    _this3.$scope.$emit('template-variable-value-updated');
-                    _this3.$scope.$root.$broadcast('refresh');
-                  });
+              this.variableSrv.updateOptions(variable).then(function () {
+                _this3.variableSrv.variableUpdated(variable).then(function () {
+                  _this3.$scope.$emit('template-variable-value-updated');
+                  _this3.$scope.$root.$broadcast('refresh');
                 });
-              }
+              });
             }
           }
         }]);
