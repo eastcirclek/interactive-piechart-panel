@@ -108,7 +108,7 @@ System.register(['lodash', 'jquery', 'jquery.flot', 'jquery.flot.pie'], function
               formatter: formatter
             },
             highlight: {
-              opacity: 0.0
+              opacity: 0.2
             },
             combine: {
               threshold: ctrl.panel.combine.threshold,

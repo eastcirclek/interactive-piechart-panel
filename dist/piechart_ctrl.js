@@ -1,9 +1,9 @@
 'use strict';
 
-System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/time_series', './rendering', './legend'], function (_export, _context) {
+System.register(['app/plugins/sdk', 'lodash', 'app/core/core', 'app/core/utils/kbn', 'app/core/time_series', './rendering', './legend', 'moment'], function (_export, _context) {
   "use strict";
 
-  var MetricsPanelCtrl, _, kbn, TimeSeries, rendering, legend, _createClass, PieChartCtrl;
+  var MetricsPanelCtrl, _, appEvents, kbn, TimeSeries, rendering, legend, moment, _createClass, PieChartCtrl;
 
   function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
@@ -40,6 +40,8 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
       MetricsPanelCtrl = _appPluginsSdk.MetricsPanelCtrl;
     }, function (_lodash) {
       _ = _lodash.default;
+    }, function (_appCoreCore) {
+      appEvents = _appCoreCore.appEvents;
     }, function (_appCoreUtilsKbn) {
       kbn = _appCoreUtilsKbn.default;
     }, function (_appCoreTime_series) {
@@ -48,6 +50,8 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
       rendering = _rendering.default;
     }, function (_legend) {
       legend = _legend.default;
+    }, function (_moment) {
+      moment = _moment.default;
     }],
     execute: function () {
       _createClass = function () {
@@ -80,6 +84,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
           _this.variableSrv = variableSrv;
           _this.variableNames = _.map(variableSrv.variables, 'name');
           _this.selectedSeries = {};
+          _this.timeBuckets = undefined;
+          _this.focusedTime = undefined;
+          _this.focusedBucketIndex = undefined;
 
           var panelDefaults = {
             pieType: 'pie',
@@ -117,10 +124,27 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
           _this.events.on('data-error', _this.onDataError.bind(_this));
           _this.events.on('data-snapshot-load', _this.onDataReceived.bind(_this));
           _this.events.on('init-edit-mode', _this.onInitEditMode.bind(_this));
+
+          appEvents.on('graph-hover', _this.onGraphHover.bind(_this));
           return _this;
         }
 
         _createClass(PieChartCtrl, [{
+          key: 'onGraphHover',
+          value: function onGraphHover(event) {
+            var _this2 = this;
+
+            var pos = event.pos;
+            var date = moment.utc(pos.x1);
+            this.focusedTime = date.unix();
+            var index = _.findLastIndex(this.timeBuckets, function (t) {
+              return t <= _this2.focusedTime;
+            });
+            if (this.focusedBucketIndex != index) {
+              this.render();
+            }
+          }
+        }, {
           key: 'onInitEditMode',
           value: function onInitEditMode() {
             this.addEditorTab('Options', 'public/plugins/grafana-piechart-panel/editor.html', 2);
@@ -148,7 +172,6 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
         }, {
           key: 'onRender',
           value: function onRender() {
-            console.log(this.series);
             this.data = this.parseSeries(this.series);
 
             if (this.panel.clickAction === 'Update variable') {
@@ -168,15 +191,43 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
             }
           }
         }, {
+          key: 'seriesData',
+          value: function seriesData(serie) {
+            var data = void 0;
+            if (this.panel.valueName != 'time') {
+              data = serie.stats[this.panel.valueName];
+            } else {
+              data = serie.flotpairs[this.focusedBucketIndex][1];
+            }
+            return data;
+          }
+        }, {
           key: 'parseSeries',
           value: function parseSeries(series) {
-            var _this2 = this;
+            var _this3 = this;
 
-            return _.map(this.series, function (serie, i) {
+            if (series && series.length > 0) {
+              this.timeBuckets = _.map(series[0].flotpairs, function (arr) {
+                return moment.utc(arr[0]).unix();
+              });
+
+              var index = _.findLastIndex(this.timeBuckets, function (t) {
+                return t <= _this3.focusedTime;
+              });
+              if (index < 0) {
+                index = 0;
+              }
+              if (index >= this.timeBuckets.length) {
+                index = this.timeBuckets.length - 1;
+              }
+              this.focusedBucketIndex = index;
+            }
+
+            return _.map(series, function (serie, i) {
               return {
                 label: serie.alias,
-                data: serie.stats[_this2.panel.valueName],
-                color: _this2.panel.aliasColors[serie.alias] || _this2.$rootScope.colors[i]
+                data: _this3.seriesData(serie),
+                color: _this3.panel.aliasColors[serie.alias] || _this3.$rootScope.colors[i]
               };
             });
           }
@@ -280,7 +331,7 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
         }, {
           key: 'updateVariable',
           value: function updateVariable() {
-            var _this3 = this;
+            var _this4 = this;
 
             if (this.panel.variableToUpdate) {
               var selectedSeries = _.keys(this.selectedSeries);
@@ -290,9 +341,9 @@ System.register(['app/plugins/sdk', 'lodash', 'app/core/utils/kbn', 'app/core/ti
               variable.current.value = selectedSeries;
 
               this.variableSrv.updateOptions(variable).then(function () {
-                _this3.variableSrv.variableUpdated(variable).then(function () {
-                  _this3.$scope.$emit('template-variable-value-updated');
-                  _this3.$scope.$root.$broadcast('refresh');
+                _this4.variableSrv.variableUpdated(variable).then(function () {
+                  _this4.$scope.$emit('template-variable-value-updated');
+                  _this4.$scope.$root.$broadcast('refresh');
                 });
               });
             }

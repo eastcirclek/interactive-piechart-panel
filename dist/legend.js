@@ -184,7 +184,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
 
               if (panel.legend.sort) {
                 seriesList = _.sortBy(seriesList, function (series) {
-                  return series.stats[panel.legend.sort];
+                  return ctrl.seriesData(series);
                 });
                 if (panel.legend.sortDesc) {
                   seriesList = seriesList.reverse();
@@ -194,7 +194,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
               if (panel.legend.percentage) {
                 var total = 0;
                 for (i = 0; i < seriesList.length; i++) {
-                  total += seriesList[i].stats[ctrl.panel.valueName];
+                  total += ctrl.seriesData(seriesList[i]);
                 }
               }
 
@@ -202,7 +202,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
 
               for (i = 0; i < seriesList.length; i++) {
                 var series = seriesList[i];
-                var value = series.stats[ctrl.panel.valueName];
+                var value = ctrl.seriesData(series);
 
                 // ignore if included in 'others'
                 if (ctrl.panel.combine.threshold > value / total) {
@@ -243,7 +243,7 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 html += '<a class="graph-legend-alias" style="float:none;">' + series.label + '</a>';
 
                 if (showValues && tableLayout) {
-                  var value = series.stats[ctrl.panel.valueName];
+                  var value = ctrl.seriesData(series);
                   if (panel.legend.values) {
                     html += '<div class="graph-legend-value">' + ctrl.formatValue(value) + '</div>';
                   }
@@ -262,15 +262,14 @@ System.register(['angular', 'app/core/utils/kbn', 'jquery', 'jquery.flot', 'jque
                 // The color of the combined slice is that of a slice that meets either of below conditions first:
                 // - the first slice to be combined, or
                 // - the first slice whose label is in ctrl.selectedSeries
-                // Must scan through 'data', not 'seriesList', because 'data' is the one used to draw pie chart
                 var labelsInOthers = _.map(combined, "label");
                 var combinedSliceColor = _.find(data, function (series) {
                   return _.includes(labelsInOthers, series.label) || series.label in ctrl.selectedSeries;
                 }).color;
 
                 var color = combinedSliceColor;
-                var value = _.sumBy(combined, function (series) {
-                  return series.stats[ctrl.panel.valueName];
+                var value = _.sumBy(combined, function (s) {
+                  return ctrl.seriesData(s);
                 });
                 var label = ctrl.panel.combine.label;
 

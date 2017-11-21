@@ -103,7 +103,7 @@ export default function link(scope, elem, attrs, ctrl) {
             formatter: formatter
           },
           highlight: {
-            opacity: 0.0
+            opacity: 0.2
           },
           combine: {
             threshold: ctrl.panel.combine.threshold,
@@ -160,7 +160,6 @@ export default function link(scope, elem, attrs, ctrl) {
         var body;
         var percent = parseFloat(item.series.percent).toFixed(2);
         var formatted = ctrl.formatValue(item.series.data[0][1]);
-
 
         body = '<div class="graph-tooltip-small"><div class="graph-tooltip-time">';
         body += '<div class="graph-tooltip-value">' + item.series.label;

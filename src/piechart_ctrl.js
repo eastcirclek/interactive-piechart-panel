@@ -1,9 +1,11 @@
 import {MetricsPanelCtrl} from 'app/plugins/sdk';
 import _ from 'lodash';
+import { appEvents } from 'app/core/core';
 import kbn from 'app/core/utils/kbn';
 import TimeSeries from 'app/core/time_series';
 import rendering from './rendering';
 import legend from './legend';
+import moment from 'moment';
 
 export class PieChartCtrl extends MetricsPanelCtrl {
 
@@ -13,6 +15,9 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     this.variableSrv = variableSrv;
     this.variableNames = _.map(variableSrv.variables, 'name');
     this.selectedSeries = {};
+    this.timeBuckets = undefined;
+    this.focusedTime = undefined;
+    this.focusedBucketIndex = undefined;
 
     var panelDefaults = {
       pieType: 'pie',
@@ -50,6 +55,18 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     this.events.on('data-error', this.onDataError.bind(this));
     this.events.on('data-snapshot-load', this.onDataReceived.bind(this));
     this.events.on('init-edit-mode', this.onInitEditMode.bind(this));
+
+    appEvents.on('graph-hover', this.onGraphHover.bind(this));
+  }
+
+  onGraphHover(event) {
+    const pos = event.pos;
+    const date = moment.utc(pos.x1);
+    this.focusedTime = date.unix();
+    const index = _.findLastIndex(this.timeBuckets, t=>(t <= this.focusedTime) );
+    if (this.focusedBucketIndex != index) {
+      this.render();
+    }
   }
 
   onInitEditMode() {
@@ -93,11 +110,37 @@ export class PieChartCtrl extends MetricsPanelCtrl {
     }
   }
 
+  seriesData(serie) {
+    let data;
+    if (this.panel.valueName != 'time') {
+      data = serie.stats[this.panel.valueName]
+    } else {
+      data = serie.flotpairs[this.focusedBucketIndex][1];
+    }
+    return data;
+  }
+
   parseSeries(series) {
-    return _.map(this.series, (serie, i) => {
+    if (series && series.length > 0) {
+      this.timeBuckets = _.map(
+        series[0].flotpairs,
+        arr=>moment.utc(arr[0]).unix()
+      );
+
+      let index = _.findLastIndex(this.timeBuckets, t=>(t <= this.focusedTime) );
+      if (index < 0) {
+        index = 0;
+      }
+      if (index >= this.timeBuckets.length) {
+        index = this.timeBuckets.length - 1;
+      }
+      this.focusedBucketIndex = index;
+    }
+
+    return _.map(series, (serie, i) => {
       return {
         label: serie.alias,
-        data: serie.stats[this.panel.valueName],
+        data: this.seriesData(serie),
         color: this.panel.aliasColors[serie.alias] || this.$rootScope.colors[i]
       };
     });
