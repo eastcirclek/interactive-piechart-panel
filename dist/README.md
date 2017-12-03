@@ -1,57 +1,11 @@
-Use the new grafana-cli tool to install piechart-panel from the commandline:
+# Pie chart 
 
-```
-grafana-cli plugins install grafana-piechart-panel
-```
+A Grafana pie chart panel plugin based on [grafana/piechart-panel](https://github.com/grafana/piechart-panel) with additional functionality:
 
-The plugin will be installed into your grafana plugins directory; the default is /var/lib/grafana/plugins if you installed the grafana package.
+## Update template variable
 
-More instructions on the cli tool can be found [here](http://docs.grafana.org/v3.0/plugins/installation/).
+You can choose what to do when you click on a slice in the pie chart or an entry in the legend. If you choose to update a template variable, you need to choose which variable to update.
+![Piechart - update variable option](https://raw.githubusercontent.com/eastcirclek/piechart-panel/master/dist/src/img/piechart-update-variable-options.png)
 
-You need the lastest grafana build for Grafana 3.0 to enable plugin support. You can get it here : http://grafana.org/download/builds.html
-
-## Alternative installation method
-
-It is also possible to clone this repo directly into your plugins directory.
-
-Afterwards restart grafana-server and the plugin should be automatically detected and used.
-
-```
-git clone https://github.com/grafana/piechart-panel.git
-sudo service grafana-server restart
-```
-
-
-## Clone into a directory of your choice
-
-If the plugin is cloned to a directory that is not the default plugins directory then you need to edit your grafana.ini config file (Default location is at /etc/grafana/grafana.ini) and add this:
-
-```ini
-[plugin.piechart]
-path = /home/your/clone/dir/piechart-panel
-```
-
-Note that if you clone it into the grafana plugins directory you do not need to add the above config option. That is only
-if you want to place the plugin in a directory outside the standard plugins directory. Be aware that grafana-server
-needs read access to the directory.
-
-# Changelog
-
-## 1.1.5
-
-* Fix for color picker in legend
-* Fix for - [Values in legend are displayed raw, not with the correct unit](https://github.com/grafana/piechart-panel/issues/51). Thanks, [@conet](https://github.com/conet)
-* Fix for - [Legend overlaps with graphs](https://github.com/grafana/piechart-panel/issues/34). Thanks, [@smalik03](https://github.com/smalik03)
-
-## 1.1.4
-* Add support for combining small slices (https://github.com/grafana/piechart-panel/pull/43)
-* Add option to show percentage in legend https://github.com/grafana/piechart-panel/pull/41
-
-## 1.0.2
-
-* Add piechart piece divider setting
-* Remove Unused code
-* Adds fontsize option for labels on graph
-* Only show the displaied piechart value in legend
-* Add possibility to pick stat to use for piechart
-
+When you click a slice, it adds the label of the slice to the list of selected values of a template variable. The same thing happens when you click an entry in the legend.  
+![Piechart - update variable example](https://raw.githubusercontent.com/eastcirclek/piechart-panel/master/dist/src/img/piechart-update-variable.gif)
